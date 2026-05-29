@@ -51,16 +51,23 @@ CE practice workflow. Use this as the source of truth for gap analysis.
 | `get_goals` | `GoalsApi.getGoals()` | Read quarterly CE goals |
 | `get_goal_details` | `GoalsApi.getGoal()` | Deep-dive on a specific goal |
 | `create_task` | `TasksApi.createTask()` | Create pipeline tasks and action items |
+| `create_subtask` | `TasksApi.createSubtaskForTask()` | Create subtasks on awareness/pre-sales tasks |
+| `update_task` | `TasksApi.updateTask(task_gid, body)` | Update Stage / Health / Risk Flag fields on pipeline tasks; mark tasks complete |
+| `create_project` | `ProjectsApi.createProject(body)` | Scaffold new customer project when POC is confirmed (Rule 4 automation support) |
+| `get_sections` | `SectionsApi.getSectionsForProject()` | List sections in CE Pipeline or customer project |
+| `create_section` | `SectionsApi.createSectionForProject()` | Add sections when scaffolding a new customer project |
+| `get_custom_fields` | `CustomFieldsApi.getCustomFields()` | Verify all 17 CE custom fields exist in the workspace |
+| `create_custom_field` | `CustomFieldsApi.createCustomField()` | Create organisation-level custom fields for CE practice schema |
+| `get_project_templates` | `ProjectTemplatesApi.getProjectTemplatesForTeam()` | Find GID of the Customer Project Template |
+| `create_project_from_template` | `ProjectTemplatesApi.instantiateProject()` | Create a new project by instantiating a saved template |
+| `scaffold_project_from_definition` | Custom / SDK orchestration | Create fully structured project, sections, tasks, and subtasks from JSON definition |
 
 ### ❌ Tier 1 — Missing: High Priority (blocks daily CE workflow)
 
 | Tool | Asana SDK Method | CE Use Case |
 |---|---|---|
-| `update_task` | `TasksApi.updateTask(task_gid, body)` | Update Stage / Health / Risk Flag fields on pipeline tasks; mark tasks complete |
-| `create_project` | `ProjectsApi.createProject(body)` | Scaffold new customer project when POC is confirmed (Rule 4 automation support) |
-| `get_sections` | `SectionsApi.getSectionsForProject()` | List sections in CE Pipeline or customer project |
-| `create_section` | `SectionsApi.createSectionForProject()` | Add sections when scaffolding a new customer project |
 | `add_task_to_project` | `TasksApi.addProjectForTask()` | Multi-home a task into CE Ops Daily Scrum board |
+| `update_project` | `ProjectsApi.updateProject()` | Update project-level custom fields (Stage, Health, WAU%) |
 
 ### ❌ Tier 2 — Missing: Medium Priority (enables portfolio & goal automation)
 
@@ -69,15 +76,12 @@ CE practice workflow. Use this as the source of truth for gap analysis.
 | `get_portfolios` | `PortfoliosApi.getPortfoliosForWorkspace()` | Find the CE Accounts portfolio GID |
 | `get_portfolio_items` | `PortfoliosApi.getItemsForPortfolio()` | List all customer projects in the portfolio for weekly report |
 | `add_project_to_portfolio` | `PortfoliosApi.addItemForPortfolio()` | Add new customer project to CE Accounts portfolio after creation |
-| `update_project` | `ProjectsApi.updateProject()` | Update project-level custom fields (Stage, Health, WAU%) |
 | `create_goal` | `GoalsApi.createGoal()` | Create quarterly CE goals programmatically |
 
 ### ❌ Tier 3 — Missing: Low Priority (nice to have)
 
 | Tool | Asana SDK Method | CE Use Case |
 |---|---|---|
-| `get_custom_fields` | `CustomFieldsApi.getCustomFields()` | Verify all 17 CE custom fields exist in the workspace |
-| `create_subtask` | `TasksApi.createSubtaskForTask()` | Create subtasks on awareness/pre-sales tasks |
 | `remove_task_from_project` | `TasksApi.removeProjectForTask()` | Remove a task from daily scrum board when done |
 | `delete_task` | `TasksApi.deleteTask()` | Clean up incorrectly created tasks |
 
@@ -104,11 +108,9 @@ Note any tools that exist but have incomplete implementations
 ### Step 3: Check API Client Instances
 ```
 Action: Check which Asana API classes are instantiated at the top of src/index.ts
-Currently instantiated: WorkspacesApi, ProjectsApi, TasksApi, GoalsApi, TeamsApi
+Currently instantiated: WorkspacesApi, ProjectsApi, TasksApi, GoalsApi, TeamsApi, SectionsApi, CustomFieldsApi, ProjectTemplatesApi
 Missing instances needed for gaps:
-  - SectionsApi    → needed for get_sections, create_section
   - PortfoliosApi  → needed for get_portfolios, get_portfolio_items, add_project_to_portfolio
-  - CustomFieldsApi → needed for get_custom_fields
 ```
 
 ### Step 4: Output Gap Report
@@ -203,17 +205,17 @@ Verify: Build completes with no errors
 
 ---
 
-## Implementation Reference: All Missing Tools
+## Implementation Reference: Missing & Reference Tools
 
-### `update_task`
+### `update_task` (Implemented ✅)
 ```typescript
 // API client: tasksApi already exists ✅
 // Schema input: task_gid (required), name?, notes?, completed?, custom_fields? (object)
-// Handler: tasksApi.updateTask(task_gid, { data: { ...fields } }, {})
+// Handler: tasksApi.updateTask(task_gid, updateData, {})
 // Key use: Updating Stage, Risk Flag, Customer Health, WAU Adoption % on tasks
 ```
 
-### `create_project`
+### `create_project` (Implemented ✅)
 ```typescript
 // API client: projectsApi already exists ✅
 // Schema input: name (required), team_gid?, workspace_gid?, notes?
@@ -221,56 +223,56 @@ Verify: Build completes with no errors
 // Default team: GCA_GTM_TEAM_GID (baked in)
 ```
 
-### `get_sections`
+### `get_sections` (Implemented ✅)
 ```typescript
-// API client: const sectionsApi = new Asana.SectionsApi(); — ADD THIS
+// API client: sectionsApi already exists ✅
 // Schema input: project_gid (required)
 // Handler: sectionsApi.getSectionsForProject(project_gid, {})
 ```
 
-### `create_section`
+### `create_section` (Implemented ✅)
 ```typescript
-// API client: sectionsApi (same as above)
+// API client: sectionsApi already exists ✅
 // Schema input: project_gid (required), name (required)
-// Handler: sectionsApi.createSectionForProject(project_gid, { data: { name } }, {})
+// Handler: sectionsApi.createSectionForProject(project_gid, { body: { data: { name } } })
 ```
 
-### `add_task_to_project`
+### `add_task_to_project` (Missing ❌)
 ```typescript
 // API client: tasksApi already exists ✅
 // Schema input: task_gid (required), project_gid (required)
 // Handler: tasksApi.addProjectForTask(task_gid, { data: { project: project_gid } }, {})
 ```
 
-### `get_portfolios`
+### `get_portfolios` (Missing ❌)
 ```typescript
 // API client: const portfoliosApi = new Asana.PortfoliosApi(); — ADD THIS
 // Schema input: workspace_gid (required)
 // Handler: portfoliosApi.getPortfoliosForWorkspace(workspace_gid, {})
 ```
 
-### `get_portfolio_items`
+### `get_portfolio_items` (Missing ❌)
 ```typescript
 // API client: portfoliosApi (same as above)
 // Schema input: portfolio_gid (required)
 // Handler: portfoliosApi.getItemsForPortfolio(portfolio_gid, {})
 ```
 
-### `add_project_to_portfolio`
+### `add_project_to_portfolio` (Missing ❌)
 ```typescript
 // API client: portfoliosApi (same as above)
 // Schema input: portfolio_gid (required), project_gid (required)
 // Handler: portfoliosApi.addItemForPortfolio(portfolio_gid, { data: { item: project_gid } }, {})
 ```
 
-### `update_project`
+### `update_project` (Missing ❌)
 ```typescript
 // API client: projectsApi already exists ✅
 // Schema input: project_gid (required), name?, notes?, custom_fields? (object)
 // Handler: projectsApi.updateProject(project_gid, { data: { ...fields } }, {})
 ```
 
-### `create_goal`
+### `create_goal` (Missing ❌)
 ```typescript
 // API client: goalsApi already exists ✅
 // Schema input: name (required), notes?, time_period?, workspace_gid?

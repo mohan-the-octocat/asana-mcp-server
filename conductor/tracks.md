@@ -19,5 +19,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Do a traceability check for the APIs in the Asana Skill and if they have been implemented or not. Update the Skill file to reflect the current contents of the source code**
+- [x] **Track: Do a traceability check for the APIs in the Asana Skill and if they have been implemented or not. Update the Skill file to reflect the current contents of the source code**
   *Link: [./tracks/traceability_check_20260529/](./tracks/traceability_check_20260529/)*
