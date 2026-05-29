@@ -1,0 +1,13 @@
+Name,Description,Due Date,Tags,Stage,Risk Flag
+🔍 Pre-Sales:,,,,,
+[PRE-SALES] <Company> - <Use case / team>,Owner: CE | Replace placeholder with actual company and use case,,pre-sales,Pre-Sales,None
+ARR Potential confirmed & entered in Asana field,"Owner: CE | Timing: Day 1 | Set ARR Potential custom field on this task. Required for Goal 1 tracking. Estimate based on team size and license tier.",,admin,Pre-Sales,None
+Vector Opportunity / Workload URL added,Owner: CE | Timing: Day 1 | Paste the CRM opportunity URL into the Vector Opportunity / Workload custom field on this task,,admin,Pre-Sales,None
+Initial technical discovery call,"Owner: CE | Timing: Week 1 | Cover: current dev tooling, team size, pain points, GCA awareness level, key stakeholders",,discovery,Pre-Sales,None
+Document requirements & current stack,"Owner: CE | Timing: Week 1 | Record: languages, IDEs, CI/CD, security posture, VPC/proxy requirements, compliance needs",,discovery,Pre-Sales,None
+Map requirements to GCA capabilities,Owner: CE | Timing: Week 2 | Identify fit and gaps between customer requirements and GCA features; note competitive context,,analysis,Pre-Sales,None
+Identify stakeholders (sponsor / IT / security),Owner: CE | Timing: Week 2 | Map economic buyer / sponsor / IT admin / security reviewer; confirm decision process,,planning,Pre-Sales,None
+Competitive landscape noted,Owner: CE | Timing: Week 2 | Document any competing tools in evaluation (GitHub Copilot / Cursor / etc.) and CE's differentiation strategy,,analysis,Pre-Sales,None
+Assess security & compliance requirements,"Owner: CE | Timing: Week 3 | Validate GCA data residency, VPC-SC, audit logging, and approval requirements with customer IT/security",,compliance,Pre-Sales,None
+POC scope & success criteria agreed,Owner: CE + Customer | Timing: Week 3-4 | Agree on pilot group size / duration / success metrics / exit criteria before POC starts,,planning,Pre-Sales,None
+Decision: Start POC / No Interest / Stalled,"Owner: CE | Timing: Week 4 | Update Stage field to POC (triggers auto-project creation via Rule 4), or set Outcome = Closed-Lost / No Interest",,decision,Pre-Sales,None
