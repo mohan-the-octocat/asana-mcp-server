@@ -1,0 +1,8 @@
+{
+  "track_id": "decouple_ce_workflows_20260529",
+  "type": "refactor",
+  "status": "new",
+  "created_at": "2026-05-29T18:57:11Z",
+  "updated_at": "2026-05-29T18:57:11Z",
+  "description": "Move any custom business logic pertaining to the CE and how their workflows into the 'the-wanderer' project. I want this project to be a plain vanilla MCP Server devoid of any business logic, and acts as a bridge between the harness and Asana. The only additional skill that I need in this would be a self-improving skill where if the MCP doesn't have a specific tool/ API implemented, it should be able to parse through the Asana API and add that tool/ API to the source code + update the relevant test case."
+}
