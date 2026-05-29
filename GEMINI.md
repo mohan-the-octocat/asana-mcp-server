@@ -31,19 +31,8 @@ These tools are always available via the Asana MCP server:
 
 **Always call `get_workspaces` first** if you don't have a workspace GID. Never guess GIDs.
 
-## PM Skill
-A dedicated **PM Skill** is bundled with this extension. It orchestrates reading from Gmail/GChat
-and writing to Asana. Activate it when the user asks to:
-- Sync their inbox/messages to Asana
-- Find action items or follow-ups from communications
-- Get a daily brief or status digest
-
 ## Google Workspace Tools
 The user has the Google Workspace extension installed. Gmail and GChat tools are available.
 Use them when the user wants to pull signals from their communications.
 Do NOT read emails or messages unless the user explicitly asks.
 
-## Conventions
-- Tasks created by the PM Skill follow the format: `[TYPE] Description — Customer/Deal`
-- Always summarize what you created/updated at the end of a PM workflow
-- When in doubt about which Asana project to use, ask before creating

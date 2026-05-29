@@ -1,18 +1,14 @@
 {
   "name": "asana",
   "version": "1.1.0",
-  "description": "Asana MCP server + PM Skill + Asana Admin Skill — reads Gmail & GChat, keeps Asana up to date for CE workflows.",
+  "description": "Asana MCP server + Asana Admin Skill — keeps Asana up to date for CE workflows.",
   "mcpServers": {
     "asana": {
       "command": "node",
-      "args": ["${extensionPath}/dist/index.js"],
-      "env": {
-        "GCA_GTM_TEAM_GID": "1213807836434813"
-      }
+      "args": ["${extensionPath}/dist/index.js"]
     }
   },
   "skills": [
-    "${extensionPath}/skills/pm/SKILL.md",
     "${extensionPath}/skills/asana-admin/SKILL.md"
   ],
   "settings": [
@@ -25,16 +21,6 @@
   ],
   "commands": [
     {
-      "name": "pm:sync",
-      "description": "Sync Gmail & GChat signals to Asana tasks",
-      "source": "${extensionPath}/commands/pm-sync.toml"
-    },
-    {
-      "name": "pm:brief",
-      "description": "Generate daily CE brief from Asana + comms",
-      "source": "${extensionPath}/commands/pm-brief.toml"
-    },
-    {
       "name": "admin:gap",
       "description": "Run gap analysis on the local Asana MCP server",
       "source": "${extensionPath}/commands/admin-gap.toml"
@@ -43,11 +29,6 @@
       "name": "admin:implement",
       "description": "Implement a missing MCP tool by name",
       "source": "${extensionPath}/commands/admin-implement.toml"
-    },
-    {
-      "name": "pm:new-opportunity",
-      "description": "Create a new Awareness or Pre-Sales opportunity in Asana with full task hierarchy and custom fields",
-      "source": "${extensionPath}/commands/pm-new-opportunity.toml"
     },
     {
       "name": "admin:setup-fields",
