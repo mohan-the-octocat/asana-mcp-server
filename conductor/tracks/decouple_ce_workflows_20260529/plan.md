@@ -5,7 +5,7 @@
     - [x] Delete `commands/admin-setup-fields.toml`
     - [x] Delete `commands/admin-setup-template.toml`
     - [x] Verify that no other custom CE-specific command or manifest files exist in this repository
-- [ ] Task: Conductor - User Manual Verification 'CE File Cleanup' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'CE File Cleanup' (Protocol in workflow.md)
 
 ## Phase 2: Decouple and Generalize `src/index.ts`
 - [ ] Task: Remove hardcoded GCA team scoping

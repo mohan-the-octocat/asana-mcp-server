@@ -434,7 +434,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     } 
     
     else if (name === "get_teams") {
-      const workspace_gid = String(args?.workspace_gid);
+      const workspace_gid = args?.workspace_gid ? String(args.workspace_gid) : undefined;
       if (!workspace_gid) throw new Error("workspace_gid is required");
 
       const teams = await teamsApi.getTeamsForWorkspace(workspace_gid, { limit: 100 });
