@@ -29,6 +29,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Update GEMINI.md to reflect generic Asana MCP Server**
+- [x] **Track: Update GEMINI.md to reflect generic Asana MCP Server**
   *Link: [./tracks/update_gemini_20260529/](./tracks/update_gemini_20260529/)*
 

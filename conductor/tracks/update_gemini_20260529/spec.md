@@ -15,7 +15,7 @@ The goal of this track is to update the user context file `GEMINI.md` to reflect
    - Retain the Google Workspace Tools usage guidelines.
 
 ## Acceptance Criteria
-- [ ] No mention of `GCA_GTM_TEAM_GID`, `1213807836434813`, or `gca_gtm_` in `GEMINI.md`.
-- [ ] `GEMINI.md` clearly states that the server is generic and requires explicit parameters (no defaults).
-- [ ] `GEMINI.md` correctly lists the available tools and their generic usage workflow.
-- [ ] The updated instructions are clear, concise, and aligned with the actual capabilities of the refactored server.
+- [x] No mention of `GCA_GTM_TEAM_GID`, `1213807836434813`, or `gca_gtm_` in `GEMINI.md`.
+- [x] `GEMINI.md` clearly states that the server is generic and requires explicit parameters (no defaults).
+- [x] `GEMINI.md` correctly lists the available tools and their generic usage workflow.
+- [x] The updated instructions are clear, concise, and aligned with the actual capabilities of the refactored server.
