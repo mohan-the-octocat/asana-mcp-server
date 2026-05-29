@@ -1,0 +1,8 @@
+{
+  "track_id": "update_gemini_20260529",
+  "type": "chore",
+  "status": "new",
+  "created_at": "2026-05-29T19:28:00Z",
+  "updated_at": "2026-05-29T19:28:00Z",
+  "description": "Update GEMINI.md to reflect the new plain-vanilla and generic state of the Asana MCP server"
+}

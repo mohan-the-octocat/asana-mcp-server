@@ -24,5 +24,11 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Move custom CE workflows to the-wanderer**
+- [x] **Track: Move custom CE workflows to the-wanderer**
   *Link: [./tracks/decouple_ce_workflows_20260529/](./tracks/decouple_ce_workflows_20260529/)*
+
+---
+
+- [ ] **Track: Update GEMINI.md to reflect generic Asana MCP Server**
+  *Link: [./tracks/update_gemini_20260529/](./tracks/update_gemini_20260529/)*
+
