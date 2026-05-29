@@ -1,0 +1,153 @@
+description = "Create a new CE opportunity in Asana — Awareness session or Pre-Sales — with the correct task hierarchy, section placement, all custom fields set, and native Asana due dates on every item. Usage: /pm:new-opportunity <type> for <Company> [field details]"
+
+prompt = """
+Activate the PM skill. Create a new CE opportunity in Asana based on the user's request: $@
+
+## Step 1 — Parse the Request
+Extract the following from the user's message:
+- OPPORTUNITY_TYPE: "Awareness" or "Pre-Sales" (default to Pre-Sales if unclear)
+- COMPANY: Customer company name
+- TOPIC: Brief topic or use case (for Awareness: session topic; for Pre-Sales: use case/team)
+- FIELD_SERVICE_REP: Seller / AE name (if mentioned)
+- PLATFORM_CE: Tech Sales Engineer name (if mentioned)
+- OPSTREE_LEAD: Opstree architect name (if mentioned)
+- SALES_MOTION: "GCA Standalone" or "Gemini Enterprise" (if mentioned)
+- ARR_POTENTIAL: Dollar value (Pre-Sales only, if mentioned)
+- NEXT_KEY_DATE: Specific session or decision date provided by the user (if mentioned)
+
+If OPPORTUNITY_TYPE or COMPANY is missing, stop and ask the user before proceeding.
+
+## Step 2 — Load Template & Compute Due Dates
+Read the appropriate task template file from ${extensionPath}/asana-templates/:
+
+- OPPORTUNITY_TYPE = "Awareness" → awareness_session_task_template.json
+- OPPORTUNITY_TYPE = "Pre-Sales"  → pre_sales_task_template.json
+
+Parse the file and extract: timeline_days, parent_due_date_offset_days, milestones[], subtasks[].
+
+**Compute all due dates now using the native Asana task due date (due_on field):**
+- TODAY = current date in YYYY-MM-DD format (use the timestamp provided in system context)
+- For each item: DUE_DATE = TODAY + due_date_offset_days (formatted as YYYY-MM-DD)
+- Store PARENT_DUE_DATE = TODAY + parent_due_date_offset_days
+
+If the user explicitly provided NEXT_KEY_DATE (a specific date):
+- Use it as the session/decision anchor for Awareness templates:
+  override "♦ Session Delivered" and "✅ SESSION DELIVERED" due dates to NEXT_KEY_DATE
+  recalculate upstream dates: Day 5 subtask = NEXT_KEY_DATE minus 2 days, Day 1 subtasks = NEXT_KEY_DATE minus 6 days
+- For Pre-Sales, use NEXT_KEY_DATE as the PARENT_DUE_DATE and scale all offsets proportionally
+
+Also replace all {placeholder} values in names and notes with actual values from Step 1.
+
+## Step 3 — Discover Workspace
+Call: get_workspaces()
+→ Store: WORKSPACE_GID (use the first workspace returned)
+
+## Step 4 — Find CE Pipeline Project
+Call: get_projects() [no args — auto-scoped to GCA GTM Team]
+→ Find the project named "CE Pipeline"
+→ Store: CE_PIPELINE_GID
+
+If CE Pipeline project not found, stop and tell the user to create it first (Implementation Guide Step 2).
+
+## Step 5 — Find the Target Section
+Call: get_sections(project_gid=CE_PIPELINE_GID)
+→ For OPPORTUNITY_TYPE = "Awareness": find section containing "Awareness"
+→ For OPPORTUNITY_TYPE = "Pre-Sales": find section containing "Pre-Sales"
+→ Store: TARGET_SECTION_GID
+
+## Step 6 — Resolve Custom Field GIDs from Template
+Call: get_custom_fields(workspace_gid=WORKSPACE_GID)
+→ Returns only GCA_GTM_ fields (prefix-filtered automatically)
+→ Build a lookup map: field name → field GID
+
+All formerly-enum fields (Stage, Customer Health, Outcome, Risk Flag, Sales Motion) are now TEXT
+type — no enum option GID resolution needed. Values are set as plain text strings.
+
+## Step 7 — Build the custom_fields Payload
+Start with the `default_custom_fields` from the template JSON. For every field:
+  → look up field GID by name (case-insensitive match against GCA_GTM_ fields)
+  → add to custom_fields: { field_gid: "text value string" }
+
+No GID lookups for values — all field values are strings passed directly.
+
+```
+custom_fields = {}
+for each [field_name, value] in template.default_custom_fields:
+  → field_gid = lookup(field_name)
+  → custom_fields[field_gid] = value   ← plain string, no enum GID needed
+```
+
+Then add user-provided values (only if the user supplied them):
+- GCA_GTM_Field Service Rep → FIELD_SERVICE_REP (text)
+- GCA_GTM_Platform CE → PLATFORM_CE (text)
+- GCA_GTM_Sales Motion → SALES_MOTION string (e.g. "GCA Standalone")
+- GCA_GTM_ARR Potential → numeric value from ARR_POTENTIAL (Pre-Sales only)
+- GCA_GTM_Next Key Date → "YYYY-MM-DD" from NEXT_KEY_DATE (if provided)
+- GCA_GTM_Vector Opportunity / Workload → URL from user (if provided)
+
+## Step 8 — Create the Parent Opportunity Task
+Use parent_task_name_pattern from the template JSON, replacing {placeholder} values.
+
+Call: create_task(
+  workspace_gid=WORKSPACE_GID,
+  name=<resolved task name from template pattern>,
+  project_gid=CE_PIPELINE_GID,
+  section_gid=TARGET_SECTION_GID,
+  custom_fields=<custom_fields from Step 7>,
+  due_on=PARENT_DUE_DATE
+)
+→ Store: PARENT_TASK_GID
+
+## Step 9 — Create Milestones with Due Dates
+For each milestone in the milestones array (in order):
+  - Name and notes already resolved in Step 2
+  Call: create_task(
+    workspace_gid=WORKSPACE_GID,
+    name=<resolved milestone name>,
+    notes=<resolved milestone notes>,
+    project_gid=CE_PIPELINE_GID,
+    section_gid=TARGET_SECTION_GID,
+    is_milestone=true,
+    due_on=<computed due date for this milestone>
+  )
+
+Milestones are Asana project-level items (not subtasks). The due_on field is their native Asana due date.
+
+## Step 10 — Create Subtasks with Due Dates
+For each subtask in the subtasks array (in order):
+  - Name and notes already resolved in Step 2
+  Call: create_subtask(
+    parent_task_gid=PARENT_TASK_GID,
+    name=<resolved subtask name>,
+    notes=<subtask notes>,
+    due_on=<computed due date for this subtask>
+  )
+
+## Step 11 — Confirm to the User
+Output:
+
+---
+✅ **OPPORTUNITY_TYPE opportunity created for COMPANY**
+
+**Task:** [task name] — due [PARENT_DUE_DATE]
+**Project:** CE Pipeline → [section name]
+**Timeline:** [timeline_days] days ([TODAY] → [PARENT_DUE_DATE])
+**Milestones:** N created | **Subtasks:** N created
+
+**Milestones & due dates:**
+| Milestone | Due Date |
+|---|---|
+[one row per milestone: name → computed due date]
+
+**Custom fields set:**
+[table: field name → value set]
+
+**Next steps:**
+- [Awareness] Opstree architect still needs to be assigned — update task manually
+- [Awareness] Mark "♦ Session Delivered" complete on session day — counts toward Goal 5
+- [Awareness] Mark "♦ Decision Made" by [Day 14 date] to close the loop
+- [Pre-Sales] Add Vector Opportunity / Workload URL by [Day 1 date]
+- [Pre-Sales] Mark "♦ Discovery Complete" by [Day 14 date] to stay on track
+- [Pre-Sales] Update Stage → POC by [Day 28 date] — triggers Rule 4 auto-project creation
+---
+"""

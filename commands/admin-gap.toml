@@ -1,0 +1,36 @@
+description = "Run a gap analysis on the local Asana MCP server — compare current tools against full CE practice requirements and report what's missing."
+
+prompt = """
+Activate the Asana Admin skill. Run a full gap analysis on the local Asana MCP server.
+
+1. Read the source file at src/index.ts (use the extensionPath to locate it)
+2. Extract the complete list of currently implemented tools
+3. Compare against the Required Tool Matrix in the Asana Admin SKILL.md
+4. Classify each missing tool by priority: Tier 1 (High) / Tier 2 (Medium) / Tier 3 (Low)
+5. Check which Asana API client instances need to be added
+
+Output a structured gap report in this format:
+
+## Asana MCP Server — Gap Analysis
+**Date:** [today]
+**Tools implemented:** N of M required
+
+### ✅ Implemented Tools (N)
+[table: Tool | Asana API Method]
+
+### 🔴 Missing — High Priority (Tier 1)
+[table: Tool | SDK Method | CE Use Case | Complexity]
+
+### 🟡 Missing — Medium Priority (Tier 2)
+[table: Tool | SDK Method | CE Use Case | Complexity]
+
+### 🟢 Missing — Low Priority (Tier 3)
+[table: Tool | SDK Method | CE Use Case | Complexity]
+
+### 🔧 Changes Required to src/index.ts
+- New API client instances to add
+- Estimated lines of code
+- Build step reminder
+
+Be precise. Read the actual source file — do not guess what's implemented.
+"""

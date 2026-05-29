@@ -1,0 +1,62 @@
+{
+  "name": "CE Pipeline",
+  "description": "Tier 1 CE practice pipeline. All customer opportunities flow through this project from Awareness → Pre-Sales → POC → Closed. One task per opportunity. Tasks are created via /pm:new-opportunity and carry all 17 GCA_GTM_ custom fields for unified reporting.",
+  "color": "light-green",
+  "required_custom_fields": {
+    "note": "After creating this project, attach all 17 GCA_GTM_ fields via Asana UI: Project → Customize → Fields → Add Field. These fields drive Goal reporting and the pm:new-opportunity workflow.",
+    "fields": [
+      "GCA_GTM_Stage",
+      "GCA_GTM_Customer Health",
+      "GCA_GTM_Outcome",
+      "GCA_GTM_Risk Flag",
+      "GCA_GTM_Sales Motion",
+      "GCA_GTM_ARR Potential",
+      "GCA_GTM_WAU Adoption %",
+      "GCA_GTM_Next Key Date",
+      "GCA_GTM_Vector Expert Request",
+      "GCA_GTM_Vector Opportunity / Workload",
+      "GCA_GTM_Field Service Rep",
+      "GCA_GTM_Platform CE",
+      "GCA_GTM_Technical Account Manager",
+      "GCA_GTM_CE Owner",
+      "GCA_GTM_Opstree Lead"
+    ]
+  },
+  "sections": [
+    {
+      "name": "🎤 Awareness Sessions",
+      "description": "Incoming awareness session requests. Tasks created via /pm:new-opportunity Awareness. GCA_GTM_Stage=Awareness.",
+      "tasks": []
+    },
+    {
+      "name": "🔍 Pre-Sales",
+      "description": "Active pre-sales engagements. Tasks created via /pm:new-opportunity Pre-Sales. GCA_GTM_Stage=Pre-Sales. ARR Potential and Vector URL required within Day 1.",
+      "tasks": []
+    },
+    {
+      "name": "🧪 POC — Active",
+      "description": "Confirmed POCs in progress. Stage updated from Pre-Sales when customer confirms. Triggers Rule 4: auto-create Tier 2 customer project from template.",
+      "tasks": []
+    },
+    {
+      "name": "✅ Closed-Won",
+      "description": "Opportunities converted to paying customers. GCA_GTM_Outcome=Closed-Won. Customer project exists in Tier 2.",
+      "tasks": []
+    },
+    {
+      "name": "❌ Closed-Lost",
+      "description": "Opportunities lost to competitor or budget. GCA_GTM_Outcome=Closed-Lost. Post-mortem notes should be captured in the task.",
+      "tasks": []
+    },
+    {
+      "name": "💤 No Interest",
+      "description": "Prospects who declined or went dark. GCA_GTM_Outcome=No Interest. GCA_GTM_Risk Flag=Going Cold auto-set after 10 days of inactivity.",
+      "tasks": []
+    },
+    {
+      "name": "🗄️ Archive",
+      "description": "Completed, stale, or de-prioritised opportunities. Move here for historical record-keeping.",
+      "tasks": []
+    }
+  ]
+}

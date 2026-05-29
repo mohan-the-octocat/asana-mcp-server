@@ -1,0 +1,294 @@
+{
+  "name": "Customer Project Template",
+  "description": "CE practice Tier 2 project template. Instantiate this for each customer that confirms a POC. Covers POC (4-6 weeks), Hyper-Care (90 days), and Steady-State phases.",
+  "color": "light-blue",
+  "required_custom_fields": {
+    "note": "After scaffolding this project, add all fields below via Asana UI: Project → Customize → Fields → Add Field. All GCA_GTM_ Stage/Health/Outcome/Risk/SalesMotion fields are TEXT type — enter allowed values as plain strings (see field descriptions in Asana for valid options).",
+    "set_at_project_creation": [
+      "GCA_GTM_Stage",
+      "GCA_GTM_Customer Health",
+      "GCA_GTM_Outcome",
+      "GCA_GTM_Risk Flag",
+      "GCA_GTM_Sales Motion",
+      "GCA_GTM_ARR Potential",
+      "GCA_GTM_Field Service Rep",
+      "GCA_GTM_Platform CE",
+      "GCA_GTM_Technical Account Manager",
+      "GCA_GTM_CE Owner",
+      "GCA_GTM_Opstree Lead",
+      "GCA_GTM_Vector Expert Request",
+      "GCA_GTM_Vector Opportunity / Workload",
+      "GCA_GTM_Contract Start Date",
+      "GCA_GTM_Renewal Date",
+      "GCA_GTM_Next Key Date"
+    ],
+    "updated_over_time": {
+      "GCA_GTM_WAU Adoption %": "Updated monthly from GCA admin console. Tracked in Steady-State phase.",
+      "GCA_GTM_Customer Health": "Text field. Values: 🟢 Green | 🟡 Yellow | 🔴 Red | ⚪ Not Started. Updated at 30/60/90-day checkpoints.",
+      "GCA_GTM_Risk Flag": "Text field. Values: None | At Risk | Blocked | Escalated | Going Cold. Updated when blockers arise.",
+      "GCA_GTM_Stage": "Text field. Values: POC | Hyper-Care | Steady-State. Updated at each lifecycle transition."
+    },
+    "default_values_at_poc_start": {
+      "note": "All text strings — set directly on the task custom_fields payload using field GID as key.",
+      "GCA_GTM_Stage": "POC",
+      "GCA_GTM_Customer Health": "⚪ Not Started",
+      "GCA_GTM_Outcome": "Active",
+      "GCA_GTM_Risk Flag": "None"
+    }
+  },
+  "sections": [
+    {
+      "name": "🧪 POC",
+      "tasks": [
+        {
+          "name": "♦ POC Kickoff",
+          "notes": "MILESTONE | Owner: CE | Timing: Day 1 | Convert to Milestone in Asana after creation.",
+          "is_milestone": true
+        },
+        {
+          "name": "POC environment provisioned (licenses/access)",
+          "notes": "Owner: CE + Customer IT | Timing: Day 1-2 | Ensure GCA licenses are assigned and dev environments are accessible for the pilot group.",
+          "subtasks": []
+        },
+        {
+          "name": "Opstree architect assigned & briefed",
+          "notes": "Owner: CE | Timing: Day 1 | Share customer context, POC scope, success criteria, and expected pilot group profile.",
+          "subtasks": []
+        },
+        {
+          "name": "POC kickoff meeting with customer engineering",
+          "notes": "Owner: CE + Opstree | Timing: Day 2-3 | Agenda: introductions, GCA overview, pilot group selection, timeline walkthrough, Q&A.",
+          "subtasks": []
+        },
+        {
+          "name": "POC success criteria sign-off doc shared & agreed",
+          "notes": "Owner: CE + Customer | Timing: Day 3-5 | Attach signed doc to this task. Capture: success metrics, pilot group size, exit criteria, decision timeline.",
+          "subtasks": []
+        },
+        {
+          "name": "GCA plugin deployed to pilot group (10-20 devs)",
+          "notes": "Owner: Opstree + Customer IT | Timing: Day 5-7 | IDE plugin installed, authenticated, and validated for all pilot users. Confirm in GCA admin console.",
+          "subtasks": []
+        },
+        {
+          "name": "Mid-POC check-in (blockers and feedback)",
+          "notes": "Owner: CE | Timing: Week 2 | Review adoption metrics, surface blockers, confirm timeline to POC completion.",
+          "subtasks": []
+        },
+        {
+          "name": "Adoption metrics from POC collected",
+          "notes": "Owner: CE | Timing: Week 3 | Pull from GCA admin console: WAU, suggestion acceptance rate, daily active users. Update WAU Adoption % field.",
+          "subtasks": []
+        },
+        {
+          "name": "POC results documented",
+          "notes": "Owner: CE + Opstree | Timing: Week 3-4 | Document: usage stats vs success criteria, key wins, blockers resolved, go-forward recommendation.",
+          "subtasks": []
+        },
+        {
+          "name": "Executive readout / go-forward recommendation",
+          "notes": "Owner: CE | Timing: Week 4-5 | Present POC results and recommendation to customer sponsor and economic buyer.",
+          "subtasks": []
+        },
+        {
+          "name": "Commercial proposal submitted",
+          "notes": "Owner: AE | Timing: Week 5 | CE to support with technical scope, pilot results, and licensing details.",
+          "subtasks": []
+        },
+        {
+          "name": "Decision: Closed-Won / Closed-Lost",
+          "notes": "Owner: CE | Timing: Week 5-6 | Update Stage, Outcome, and Customer Health fields. If won: proceed to Hyper-Care. If lost: complete post-mortem.",
+          "subtasks": []
+        },
+        {
+          "name": "♦ POC Completion",
+          "notes": "MILESTONE | Owner: CE | Timing: Week 4-6 | Convert to Milestone in Asana after creation.",
+          "is_milestone": true
+        }
+      ]
+    },
+    {
+      "name": "🚀 Hyper-Care",
+      "tasks": [
+        {
+          "name": "♦ Kickoff Complete",
+          "notes": "MILESTONE | Owner: CE | Timing: Day 5 | Convert to Milestone in Asana after creation.",
+          "is_milestone": true
+        },
+        {
+          "name": "♦ Plugin Deployed",
+          "notes": "MILESTONE | Owner: Opstree | Timing: Day 14 | Convert to Milestone in Asana after creation.",
+          "is_milestone": true
+        },
+        {
+          "name": "♦ 30-Day Adoption Report",
+          "notes": "MILESTONE | Owner: CE | Timing: Day 30 | Convert to Milestone in Asana after creation.",
+          "is_milestone": true
+        },
+        {
+          "name": "♦ 60-Day Health Check",
+          "notes": "MILESTONE | Owner: CE | Timing: Day 60 | Convert to Milestone in Asana after creation.",
+          "is_milestone": true
+        },
+        {
+          "name": "♦ Graduation to Steady-State",
+          "notes": "MILESTONE | Owner: CE | Timing: Day 90 | WAU >= 60% required. Convert to Milestone in Asana after creation.",
+          "is_milestone": true
+        },
+        {
+          "name": "[Kickoff] Internal handoff (CE to Opstree to TAM)",
+          "notes": "Owner: CE | Timing: Day 1 | Brief Opstree and TAM on customer context, deal details, POC results, and 90-day plan."
+        },
+        {
+          "name": "[Kickoff] Customer kickoff call",
+          "notes": "Owner: CE + Opstree | Timing: Day 3 | Introductions, onboarding plan walkthrough, expectations setting, escalation path."
+        },
+        {
+          "name": "[Kickoff] Technical onboarding plan shared",
+          "notes": "Owner: Opstree | Timing: Day 5 | Deliver written onboarding plan to customer IT lead and champion."
+        },
+        {
+          "name": "[Kickoff] Admin console setup & license provisioning",
+          "notes": "Owner: Opstree | Timing: Day 7 | Configure GCA admin console, assign licenses, verify authentication."
+        },
+        {
+          "name": "[Kickoff] Admin sessions delivered (IT/admin team training)",
+          "notes": "Owner: Opstree | Timing: Day 7-14 | Train customer admins on GCA console management, policy configuration, and user management."
+        },
+        {
+          "name": "[Kickoff] Enablement sessions conducted (dev team onboarding)",
+          "notes": "Owner: Opstree | Timing: Day 14-30 | Developer onboarding sessions covering GCA features, prompt engineering, and best practices."
+        },
+        {
+          "name": "[Integration] IDE plugin deployment plan agreed with IT",
+          "notes": "Owner: Opstree + Customer IT | Timing: Day 7-10 | Document rollout approach, IT dependencies, and timeline for full team deployment."
+        },
+        {
+          "name": "[Integration] Pilot group rollout (10-20 devs)",
+          "notes": "Owner: Opstree + Customer IT | Timing: Day 14 | Full plugin installation and validation for pilot cohort. Validate in GCA console."
+        },
+        {
+          "name": "[Integration] VPC-SC / proxy configuration (if needed)",
+          "notes": "Owner: Opstree | Timing: Day 10-14 | Configure network routing for GCA in restricted environments (VPC Service Controls, proxy, allowlist)."
+        },
+        {
+          "name": "[Integration] Coding standards & prompt guidance shared",
+          "notes": "Owner: Opstree | Timing: Day 14 | Share GCA usage guidelines, prompt engineering tips, and team-specific coding standards."
+        },
+        {
+          "name": "[Adoption] First adoption metrics collected",
+          "notes": "Owner: CE | Timing: Day 21 | Pull WAU and acceptance rate from GCA admin console. Update WAU Adoption % custom field."
+        },
+        {
+          "name": "[Adoption] Developer feedback session",
+          "notes": "Owner: CE + Opstree | Timing: Day 21 | Structured feedback from pilot developers on blockers, wins, and feature requests."
+        },
+        {
+          "name": "[Adoption] Enablement workshop delivered",
+          "notes": "Owner: Opstree | Timing: Day 28 | Hands-on workshop for full dev team covering advanced GCA features and use cases."
+        },
+        {
+          "name": "[Adoption] 30-day adoption report",
+          "notes": "Owner: CE | Timing: Day 30 | Report on WAU adoption vs target. Share with customer sponsor and internal leadership."
+        },
+        {
+          "name": "[Adoption] Broader rollout (full team)",
+          "notes": "Owner: Opstree | Timing: Day 35-45 | Expand GCA access from pilot to full developer organisation. Monitor for issues."
+        },
+        {
+          "name": "[Adoption] 60-day health check",
+          "notes": "Owner: CE | Timing: Day 60 | Review adoption metrics and overall health with customer champion. Update Customer Health field."
+        },
+        {
+          "name": "[Adoption] Blockers resolved (policy / proxy / UX)",
+          "notes": "Owner: Opstree | Timing: Ongoing | Track and resolve any adoption blockers raised by developers. Log resolution in task comments."
+        },
+        {
+          "name": "[Graduation] WAU adoption >= 60% confirmed",
+          "notes": "Owner: CE | Timing: Day 75 | Validate adoption threshold met from GCA admin console. Green light for graduation to Steady-State."
+        },
+        {
+          "name": "[Graduation] First QBR scheduled",
+          "notes": "Owner: CE | Timing: Day 80 | Set QBR date with customer sponsor. Confirm agenda: adoption metrics, wins, roadmap, expansion."
+        },
+        {
+          "name": "[Graduation] Opstree ongoing scope agreed",
+          "notes": "Owner: CE + Opstree | Timing: Day 85 | Define Opstree involvement for Steady-State phase (ad-hoc vs retainer)."
+        },
+        {
+          "name": "[Graduation] Update Stage field to Steady-State",
+          "notes": "Owner: CE | Timing: Day 90 | Update Stage custom field on this project from Hyper-Care to Steady-State."
+        }
+      ]
+    },
+    {
+      "name": "📈 Steady-State",
+      "tasks": [
+        {
+          "name": "[Monthly] Monthly adoption metrics pull",
+          "notes": "Owner: CE | Timing: 1st of each month | RECURRING — pull WAU from GCA admin console. Update WAU Adoption % field."
+        },
+        {
+          "name": "[Monthly] Champion check-in call",
+          "notes": "Owner: CE | Timing: Monthly | RECURRING — 30-min sync with customer champion on adoption signals, asks, and blockers."
+        },
+        {
+          "name": "[Monthly] Update Customer Health & WAU Adoption % fields",
+          "notes": "Owner: CE | Timing: Monthly | RECURRING — update both custom fields based on latest metrics and champion feedback."
+        },
+        {
+          "name": "[Weekly] Watch for WAU drop greater than 10%",
+          "notes": "Owner: Opstree | Timing: Weekly | RECURRING — flag to CE if week-on-week adoption drops materially. Investigate root cause."
+        },
+        {
+          "name": "[QBR] Pull usage data from GCA admin console",
+          "notes": "Owner: Opstree | Timing: 2 weeks before QBR | Export usage stats for QBR deck: WAU trend, acceptance rate, active users by team."
+        },
+        {
+          "name": "[QBR] Draft QBR deck",
+          "notes": "Owner: CE + Opstree | Timing: 1 week before QBR | Cover: usage stats vs targets, wins, developer feedback, roadmap, asks from customer."
+        },
+        {
+          "name": "[QBR] QBR review call with sponsor / leadership",
+          "notes": "Owner: CE | Timing: Quarterly | Deliver QBR and capture all action items during call. Record meeting if permitted."
+        },
+        {
+          "name": "[QBR] Capture & enter QBR action items in Asana",
+          "notes": "Owner: CE | Timing: Day of QBR | Create tasks in this project for every customer action item raised during the QBR."
+        },
+        {
+          "name": "[Expansion] Expansion signal identified",
+          "notes": "Owner: CE | Timing: As identified | Log expansion opportunity (new team, new use case, seat expansion). Create pre-sales task in CE Pipeline."
+        },
+        {
+          "name": "[Expansion] Expansion discovery call",
+          "notes": "Owner: CE | Timing: As identified | Qualify the expansion scope, ARR potential, and timeline."
+        },
+        {
+          "name": "[Expansion] Commercial expansion discussion",
+          "notes": "Owner: AE + CE | Timing: As identified | Hand off expansion opportunity to AE for commercial motion."
+        },
+        {
+          "name": "[Renewal] Renewal date logged in Next Key Date field",
+          "notes": "Owner: CE | Timing: Day of contract | Set Renewal Date custom field and Next Key Date on this project."
+        },
+        {
+          "name": "[Renewal] 90-day pre-renewal health check",
+          "notes": "Owner: CE | Timing: 90 days before renewal | Review health, adoption trend, and champion sentiment. Flag any renewal risk early."
+        },
+        {
+          "name": "[Renewal] Renewal risk assessment — update Health field",
+          "notes": "Owner: CE | Timing: 90 days before renewal | Set Customer Health field. If Red: escalate to manager and AE immediately."
+        },
+        {
+          "name": "[Renewal] Renewal confirmed / at-risk escalated",
+          "notes": "Owner: CE + AE | Timing: Before renewal date | Confirm renewal signed or escalate risk with documented action plan."
+        }
+      ]
+    },
+    {
+      "name": "🗄️ Archive",
+      "tasks": []
+    }
+  ]
+}

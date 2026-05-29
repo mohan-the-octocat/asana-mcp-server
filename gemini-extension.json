@@ -1,0 +1,63 @@
+{
+  "name": "asana",
+  "version": "1.1.0",
+  "description": "Asana MCP server + PM Skill + Asana Admin Skill — reads Gmail & GChat, keeps Asana up to date for CE workflows.",
+  "mcpServers": {
+    "asana": {
+      "command": "node",
+      "args": ["${extensionPath}/dist/index.js"],
+      "env": {
+        "GCA_GTM_TEAM_GID": "1213807836434813"
+      }
+    }
+  },
+  "skills": [
+    "${extensionPath}/skills/pm/SKILL.md",
+    "${extensionPath}/skills/asana-admin/SKILL.md"
+  ],
+  "settings": [
+    {
+      "name": "Asana Personal Access Token",
+      "description": "Create one at: Asana → My Settings → Apps → Manage Developer Apps → Personal Access Tokens",
+      "envVar": "ASANA_ACCESS_TOKEN",
+      "sensitive": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "pm:sync",
+      "description": "Sync Gmail & GChat signals to Asana tasks",
+      "source": "${extensionPath}/commands/pm-sync.toml"
+    },
+    {
+      "name": "pm:brief",
+      "description": "Generate daily CE brief from Asana + comms",
+      "source": "${extensionPath}/commands/pm-brief.toml"
+    },
+    {
+      "name": "admin:gap",
+      "description": "Run gap analysis on the local Asana MCP server",
+      "source": "${extensionPath}/commands/admin-gap.toml"
+    },
+    {
+      "name": "admin:implement",
+      "description": "Implement a missing MCP tool by name",
+      "source": "${extensionPath}/commands/admin-implement.toml"
+    },
+    {
+      "name": "pm:new-opportunity",
+      "description": "Create a new Awareness or Pre-Sales opportunity in Asana with full task hierarchy and custom fields",
+      "source": "${extensionPath}/commands/pm-new-opportunity.toml"
+    },
+    {
+      "name": "admin:setup-fields",
+      "description": "One-time setup: create all 17 CE practice custom fields at org level in Asana",
+      "source": "${extensionPath}/commands/admin-setup-fields.toml"
+    },
+    {
+      "name": "admin:setup-template",
+      "description": "Build an Asana project from a JSON template definition. Usage: /admin:setup-template customer-project | awareness | pre-sales",
+      "source": "${extensionPath}/commands/admin-setup-template.toml"
+    }
+  ]
+}

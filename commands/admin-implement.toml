@@ -1,0 +1,16 @@
+description = "Implement a specific missing tool in the local Asana MCP server. Provide the tool name as an argument."
+
+prompt = """
+Activate the Asana Admin skill. Implement the missing tool: $1
+
+1. Read src/index.ts to understand the current code structure and patterns
+2. Look up the implementation reference for "$1" in the Asana Admin SKILL.md
+3. Implement the tool following the established patterns:
+   - Add any required API client instance (if not already present)
+   - Add the tool definition to the ListToolsRequestSchema handler
+   - Add the execution logic to the CallToolRequestSchema handler
+4. Use multi_replace_file_content to apply the changes
+5. Run: npm run build to compile and verify
+
+Report what was changed and confirm the build succeeded.
+"""
