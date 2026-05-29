@@ -1,0 +1,8 @@
+{
+  "track_id": "fix_validation_20260529",
+  "type": "bug",
+  "status": "new",
+  "created_at": "2026-05-29T11:52:29Z",
+  "updated_at": "2026-05-29T11:52:29Z",
+  "description": "Fix input validation and error handling for missing arguments in all tools"
+}
