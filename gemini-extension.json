@@ -17,6 +17,12 @@
       "description": "Create one at: Asana → My Settings → Apps → Manage Developer Apps → Personal Access Tokens",
       "envVar": "ASANA_ACCESS_TOKEN",
       "sensitive": true
+    },
+    {
+      "name": "Asana Team GID",
+      "description": "The default team GID to scope Asana projects and requests to (e.g. 1213807836434813).",
+      "envVar": "ASANA_TEAM_GID",
+      "sensitive": false
     }
   ],
   "commands": [

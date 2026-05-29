@@ -261,14 +261,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             team_gid: {
               type: "string",
-              description: "The ID (gid) of the team to create the project in.",
+              description: "Optional. The ID (gid) of the team to create the project in. Defaults to the ASANA_TEAM_GID environment variable.",
             },
             color: {
               type: "string",
               description: "Optional project color (e.g. 'light-green', 'light-blue', 'light-red').",
             },
           },
-          required: ["name", "team_gid"],
+          required: ["name"],
         },
       },
       {
@@ -365,10 +365,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             team_gid: {
               type: "string",
-              description: "The ID (gid) of the team to list templates for.",
+              description: "Optional. The ID (gid) of the team to list templates for. Defaults to the ASANA_TEAM_GID environment variable.",
             },
           },
-          required: ["team_gid"],
         },
       },
       {
@@ -387,14 +386,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             team_gid: {
               type: "string",
-              description: "The GID of the team to create the project in.",
+              description: "Optional. The GID of the team to create the project in. Defaults to the ASANA_TEAM_GID environment variable.",
             },
             public: {
               type: "boolean",
               description: "Optional. Whether the project is public within the team. Default: false.",
             },
           },
-          required: ["template_gid", "name", "team_gid"],
+          required: ["template_gid", "name"],
         },
       },
       {
@@ -413,10 +412,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             team_gid: {
               type: "string",
-              description: "The ID (gid) of the team.",
+              description: "Optional. The ID (gid) of the team. Defaults to the ASANA_TEAM_GID environment variable.",
             },
           },
-          required: ["workspace_gid", "definition", "team_gid"],
+          required: ["workspace_gid", "definition"],
         },
       },
     ],
@@ -446,7 +445,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     else if (name === "get_projects") {
-      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
+      const team_gid = args?.team_gid ? String(args.team_gid) : process.env.ASANA_TEAM_GID;
       const workspace_gid = args?.workspace_gid ? String(args.workspace_gid) : undefined;
 
       if (!team_gid && !workspace_gid) {
@@ -498,7 +497,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     
     else if (name === "get_goals") {
       const workspace_gid = args?.workspace_gid ? String(args.workspace_gid) : undefined;
-      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
+      const team_gid = args?.team_gid ? String(args.team_gid) : process.env.ASANA_TEAM_GID;
 
       if (!workspace_gid && !team_gid) {
         throw new Error("Either workspace_gid or team_gid must be provided");
@@ -588,7 +587,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     else if (name === "create_project") {
       const projectName = String(args?.name);
-      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
+      const team_gid = args?.team_gid ? String(args.team_gid) : process.env.ASANA_TEAM_GID;
       if (!projectName || !team_gid) throw new Error("name and team_gid are required");
 
       const projectData: any = {
@@ -752,7 +751,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     else if (name === "get_project_templates") {
-      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
+      const team_gid = args?.team_gid ? String(args.team_gid) : process.env.ASANA_TEAM_GID;
       if (!team_gid) throw new Error("team_gid is required");
 
       const templates = await projectTemplatesApi.getProjectTemplatesForTeam(team_gid, { limit: 100 });
@@ -764,7 +763,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     else if (name === "create_project_from_template") {
       const template_gid = String(args?.template_gid);
       const projectName = String(args?.name);
-      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
+      const team_gid = args?.team_gid ? String(args.team_gid) : process.env.ASANA_TEAM_GID;
       if (!template_gid || !projectName || !team_gid) {
         throw new Error("template_gid, name, and team_gid are required");
       }
@@ -811,7 +810,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     else if (name === "scaffold_project_from_definition") {
       const workspace_gid = String(args?.workspace_gid);
       const definition = args?.definition as any;
-      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
+      const team_gid = args?.team_gid ? String(args.team_gid) : process.env.ASANA_TEAM_GID;
       if (!workspace_gid || !definition || !team_gid) {
         throw new Error("workspace_gid, definition, and team_gid are required");
       }
