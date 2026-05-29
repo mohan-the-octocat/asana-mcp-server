@@ -29,11 +29,11 @@ The only specialized skill left in the project will be `asana-admin` inside `ski
 - Keep the MCP server lightweight and performant.
 
 ## Acceptance Criteria
-- [ ] No mention of `GCA_GTM_TEAM_GID` or `gca_gtm_` in `src/index.ts`.
-- [ ] No custom CE-specific files or commands remain in the workspace.
-- [ ] `skills/asana-admin/SKILL.md` exists and defines the self-improving tool-adder blueprint.
-- [ ] Code compiles (`npm run build`) without errors.
-- [ ] All unit tests (`npm test`) compile and pass.
+- [x] No mention of `GCA_GTM_TEAM_GID` or `gca_gtm_` in `src/index.ts`.
+- [x] No custom CE-specific files or commands remain in the workspace.
+- [x] `skills/asana-admin/SKILL.md` exists and defines the self-improving tool-adder blueprint.
+- [x] Code compiles (`npm run build`) without errors.
+- [x] All unit tests (`npm test`) compile and pass.
 
 ## Out of Scope
 - Implementation of the actual "the-wanderer" extension.
