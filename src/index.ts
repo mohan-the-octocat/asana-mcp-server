@@ -14,10 +14,6 @@ if (!ASANA_ACCESS_TOKEN) {
   process.exit(1);
 }
 
-// GCA GTM Team GID — baked into the extension manifest as an env var.
-// Fallback constant ensures scoping works even if the env var is missing.
-const GCA_GTM_TEAM_GID = process.env.GCA_GTM_TEAM_GID ?? "1213807836434813";
-
 // Initialize Asana Client
 const client = Asana.ApiClient.instance;
 let token = client.authentications['token'];
@@ -59,7 +55,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "get_teams",
-        description: "List all teams in a workspace. Only needed for initial setup to find the GCA GTM Team GID — which should already be stored in GCA_GTM_TEAM_GID env var after installation.",
+        description: "List all teams in a workspace.",
         inputSchema: {
           type: "object",
           properties: {
@@ -73,17 +69,17 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "get_projects",
-        description: "List projects scoped to a team or workspace. Defaults to the pre-configured GCA GTM Team (GCA_GTM_TEAM_GID env var) when no team_gid is provided — no extra API call needed. Pass workspace_gid to fall back to a full workspace scan.",
+        description: "List projects scoped to a team or workspace. Either team_gid or workspace_gid is required.",
         inputSchema: {
           type: "object",
           properties: {
             workspace_gid: {
               type: "string",
-              description: "The ID (gid) of the workspace. Only needed if querying all workspace projects.",
+              description: "The ID (gid) of the workspace. Required if team_gid is not provided.",
             },
             team_gid: {
               type: "string",
-              description: "The ID (gid) of the team. Defaults to GCA GTM Team if omitted.",
+              description: "The ID (gid) of the team. Required if workspace_gid is not provided.",
             },
           },
         },
@@ -132,7 +128,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "get_goals",
-        description: "List goals within a specific workspace or team.",
+        description: "List goals within a specific workspace or team. Either workspace_gid or team_gid must be provided.",
         inputSchema: {
           type: "object",
           properties: {
@@ -149,7 +145,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "create_task",
-        description: "Create a new task in a project. Supports placing the task in a specific section and setting custom field values. Use this for creating pipeline tasks (Awareness, Pre-Sales) in CE Pipeline.",
+        description: "Create a new task in a project. Supports placing the task in a specific section and setting custom field values.",
         inputSchema: {
           type: "object",
           properties: {
@@ -191,7 +187,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "create_subtask",
-        description: "Create a subtask under an existing parent task. Use this to add checklist items (Awareness session steps, Pre-Sales workflow steps) under a parent opportunity task.",
+        description: "Create a subtask under an existing parent task.",
         inputSchema: {
           type: "object",
           properties: {
@@ -221,7 +217,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "update_task",
-        description: "Update an existing task's fields including name, notes, completion status, and custom field values. Use this to update Stage, Risk Flag, Customer Health, WAU Adoption % on pipeline tasks and customer project tasks.",
+        description: "Update an existing task's fields including name, notes, completion status, and custom field values.",
         inputSchema: {
           type: "object",
           properties: {
@@ -251,13 +247,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "create_project",
-        description: "Create a new Asana project in the GCA GTM Team. Use this when a Pre-Sales opportunity is confirmed for POC — creates the Tier 2 customer project. Defaults to GCA GTM Team.",
+        description: "Create a new Asana project in a specific team.",
         inputSchema: {
           type: "object",
           properties: {
             name: {
               type: "string",
-              description: "The name of the project (e.g. the customer name).",
+              description: "The name of the project.",
             },
             notes: {
               type: "string",
@@ -265,19 +261,19 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             team_gid: {
               type: "string",
-              description: "Optional. Defaults to GCA GTM Team (GCA_GTM_TEAM_GID env var).",
+              description: "The ID (gid) of the team to create the project in.",
             },
             color: {
               type: "string",
               description: "Optional project color (e.g. 'light-green', 'light-blue', 'light-red').",
             },
           },
-          required: ["name"],
+          required: ["name", "team_gid"],
         },
       },
       {
         name: "get_sections",
-        description: "List all sections in a project. Use this to find section GIDs needed for placing tasks in specific sections (e.g. Awareness Sessions, Pre-Sales, POC, Hyper-Care).",
+        description: "List all sections in a project.",
         inputSchema: {
           type: "object",
           properties: {
@@ -291,7 +287,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "create_section",
-        description: "Create a new section in a project. Use this when scaffolding a new customer project to add POC, Hyper-Care, Steady-State, and Archive sections.",
+        description: "Create a new section in a project.",
         inputSchema: {
           type: "object",
           properties: {
@@ -309,7 +305,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "get_custom_fields",
-        description: "List custom fields in the workspace filtered by a name prefix. Defaults to prefix='GCA_GTM_' so only CE practice fields are returned — avoids timeouts in large workspaces with hundreds of org-wide fields. Returns GIDs, types, and enum option GIDs needed for custom_fields payloads.",
+        description: "List custom fields in the workspace, optionally filtered by a name prefix. Returns GIDs, types, and enum option GIDs needed for custom_fields payloads.",
         inputSchema: {
           type: "object",
           properties: {
@@ -319,7 +315,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             name_prefix: {
               type: "string",
-              description: "Optional. Only return fields whose name starts with this prefix (case-insensitive). Defaults to 'GCA_GTM_'. Pass empty string '' to return all fields.",
+              description: "Optional. Only return fields whose name starts with this prefix (case-insensitive). Defaults to an empty string '' to scan all fields.",
             },
           },
           required: ["workspace_gid"],
@@ -327,7 +323,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "create_custom_field",
-        description: "Create an organisation-level custom field in the Asana workspace. Supports text, number, currency, date, enum (single-select), and people types. For enum fields, pass enum_options as an array of option name strings — options are created in order. Set is_global_to_workspace=true (default) to make it available across all projects. Use this to set up the CE practice field schema (Stage, Risk Flag, ARR Potential, etc.).",
+        description: "Create an organisation-level custom field in the Asana workspace. Supports text, number, currency, date, enum (single-select), and people types. For enum fields, pass enum_options as an array of option name strings — options are created in order. Set is_global_to_workspace=true (default) to make it available across all projects.",
         inputSchema: {
           type: "object",
           properties: {
@@ -363,15 +359,21 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "get_project_templates",
-        description: "List all project templates in the GCA GTM Team. Use this to find the GID of the Customer Project Template before calling create_project_from_template.",
+        description: "List all project templates in a team.",
         inputSchema: {
           type: "object",
-          properties: {},
+          properties: {
+            team_gid: {
+              type: "string",
+              description: "The ID (gid) of the team to list templates for.",
+            },
+          },
+          required: ["team_gid"],
         },
       },
       {
         name: "create_project_from_template",
-        description: "Create a new Asana project by instantiating a saved project template. Preserves the full task structure, sections, and milestones from the template. Use this when a Pre-Sales opportunity confirms POC — instantiates the Customer Project Template with all sections and tasks in place. Polls until ready and returns the new project GID.",
+        description: "Create a new Asana project by instantiating a saved project template. Preserves the full task structure, sections, and milestones from the template. Polls until ready and returns the new project GID.",
         inputSchema: {
           type: "object",
           properties: {
@@ -381,23 +383,23 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             name: {
               type: "string",
-              description: "Name for the new project (e.g. the customer company name).",
+              description: "Name for the new project.",
             },
             team_gid: {
               type: "string",
-              description: "Optional. Defaults to GCA GTM Team.",
+              description: "The GID of the team to create the project in.",
             },
             public: {
               type: "boolean",
               description: "Optional. Whether the project is public within the team. Default: false.",
             },
           },
-          required: ["template_gid", "name"],
+          required: ["template_gid", "name", "team_gid"],
         },
       },
       {
         name: "scaffold_project_from_definition",
-        description: "Create a fully structured Asana project from a JSON definition object. Builds the project, all sections, tasks (including milestones), and subtasks in the correct order. Use this with the customer_project_template.json to scaffold a Tier 2 customer project via the Asana Admin skill. Returns the new project GID and a summary of everything created.",
+        description: "Create a fully structured Asana project from a JSON definition object. Builds the project, all sections, tasks (including milestones), and subtasks in the correct order. Returns the new project GID and a summary of everything created.",
         inputSchema: {
           type: "object",
           properties: {
@@ -411,10 +413,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             team_gid: {
               type: "string",
-              description: "Optional. Defaults to GCA GTM Team.",
+              description: "The ID (gid) of the team.",
             },
           },
-          required: ["workspace_gid", "definition"],
+          required: ["workspace_gid", "definition", "team_gid"],
         },
       },
     ],
@@ -444,14 +446,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     else if (name === "get_projects") {
-      // Resolve team_gid: explicit arg → installed default → workspace fallback
-      const team_gid = args?.team_gid
-        ? String(args.team_gid)
-        : GCA_GTM_TEAM_GID;
+      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
       const workspace_gid = args?.workspace_gid ? String(args.workspace_gid) : undefined;
 
       if (!team_gid && !workspace_gid) {
-        throw new Error("Either team_gid or workspace_gid is required (or set GCA_GTM_TEAM_GID at install time)");
+        throw new Error("Either team_gid or workspace_gid is required");
       }
 
       // Request rich fields so callers can understand team membership and archive status
@@ -499,13 +498,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     
     else if (name === "get_goals") {
       const workspace_gid = args?.workspace_gid ? String(args.workspace_gid) : undefined;
-      // Resolve team_gid: explicit arg → installed default
-      const team_gid = args?.team_gid
-        ? String(args.team_gid)
-        : GCA_GTM_TEAM_GID;
+      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
 
       if (!workspace_gid && !team_gid) {
-        throw new Error("Either workspace_gid or team_gid must be provided (or set GCA_GTM_TEAM_GID at install time)");
+        throw new Error("Either workspace_gid or team_gid must be provided");
       }
 
       const opts: any = { limit: 100 };
@@ -592,9 +588,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     else if (name === "create_project") {
       const projectName = String(args?.name);
-      if (!projectName) throw new Error("name is required");
+      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
+      if (!projectName || !team_gid) throw new Error("name and team_gid are required");
 
-      const team_gid = args?.team_gid ? String(args.team_gid) : GCA_GTM_TEAM_GID;
       const projectData: any = {
         name: projectName,
         team: team_gid,
@@ -633,11 +629,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const workspace_gid = String(args?.workspace_gid);
       if (!workspace_gid) throw new Error("workspace_gid is required");
 
-      // Default to GCA_GTM_ prefix to avoid scanning the entire org's field list.
-      // Pass name_prefix="" to return all fields.
       const namePrefix = args?.name_prefix !== undefined
         ? String(args.name_prefix).toLowerCase()
-        : "gca_gtm_";
+        : "";
 
       const matchingFields: any[] = [];
       let offset: string | undefined = undefined;
@@ -673,11 +667,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error("workspace_gid, name, and field_type are required");
       }
 
-      // ── Idempotent guard: search only within GCA_GTM_ prefix to avoid full workspace scan ──
+      // ── Idempotent guard: search all custom fields to avoid duplicates ──
       let existingField: any = null;
       let offset: string | undefined = undefined;
       const searchName = fieldName.toLowerCase();
-      const prefix = searchName.startsWith("gca_gtm_") ? "gca_gtm_" : "";
 
       for (let page = 0; page < 100; page++) {
         const response: any = await customFieldsApi.getCustomFieldsForWorkspace(
@@ -686,12 +679,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         );
         const pageFields: any[] = response.data ?? [];
 
-        // Filter to prefix first — skip pages that contain no GCA_GTM_ fields
-        const prefixMatches = prefix
-          ? pageFields.filter((f: any) => f.name.toLowerCase().startsWith(prefix))
-          : pageFields;
-
-        existingField = prefixMatches.find(
+        existingField = pageFields.find(
           (f: any) => f.name.toLowerCase() === searchName
         );
         if (existingField) break;
@@ -764,7 +752,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     else if (name === "get_project_templates") {
-      const templates = await projectTemplatesApi.getProjectTemplatesForTeam(GCA_GTM_TEAM_GID, { limit: 100 });
+      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
+      if (!team_gid) throw new Error("team_gid is required");
+
+      const templates = await projectTemplatesApi.getProjectTemplatesForTeam(team_gid, { limit: 100 });
       return {
         content: [{ type: "text", text: JSON.stringify(templates.data, null, 2) }],
       };
@@ -773,9 +764,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     else if (name === "create_project_from_template") {
       const template_gid = String(args?.template_gid);
       const projectName = String(args?.name);
-      if (!template_gid || !projectName) throw new Error("template_gid and name are required");
-
-      const team_gid = args?.team_gid ? String(args.team_gid) : GCA_GTM_TEAM_GID;
+      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
+      if (!template_gid || !projectName || !team_gid) {
+        throw new Error("template_gid, name, and team_gid are required");
+      }
       const isPublic = args?.public === true;
 
       // Instantiate the template — returns a Job (async in Asana)
@@ -819,9 +811,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     else if (name === "scaffold_project_from_definition") {
       const workspace_gid = String(args?.workspace_gid);
       const definition = args?.definition as any;
-      if (!workspace_gid || !definition) throw new Error("workspace_gid and definition are required");
-
-      const team_gid = args?.team_gid ? String(args.team_gid) : GCA_GTM_TEAM_GID;
+      const team_gid = args?.team_gid ? String(args.team_gid) : undefined;
+      if (!workspace_gid || !definition || !team_gid) {
+        throw new Error("workspace_gid, definition, and team_gid are required");
+      }
       const summary: any = { sections: [] };
 
       // Step 1: Create the project

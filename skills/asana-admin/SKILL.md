@@ -1,289 +1,153 @@
 ---
 name: asana-admin
 description: >
-  Asana Admin skill for maintaining and extending the local Asana MCP server.
+  Asana Admin skill for maintaining and extending the local generic Asana MCP server.
   Activate when the user asks to: audit the MCP server's capabilities, run a gap
-  analysis against CE practice requirements, check server health, or implement a
-  missing tool. This skill reads the local source code, compares it to the required
-  feature set defined in the CE practice design docs, and produces actionable gap
-  reports or writes code directly.
+  analysis, or implement a missing Asana API tool. This skill reads the local source
+  code, matches it against Asana API endpoints, and automatically writes the tool schemas,
+  execution handlers, and Vitest unit tests before compiling and verifying the project.
 ---
 
-# Asana Admin Skill — MCP Server Overseer
+# Asana Admin Skill — Generic MCP Server Self-Improvement Guide
 
 ## Your Role in This Skill
-You are a senior TypeScript/MCP engineer and Asana API specialist. Your job is to:
-1. Audit the locally running Asana MCP server at `src/index.ts`
-2. Compare its current capabilities against the full CE practice requirements
-3. Produce a structured gap analysis
-4. Implement missing tools on demand — using the patterns already established in the codebase
+You are a senior TypeScript/MCP engineer, Asana API specialist, and self-improving agent. Your job is to:
+1. **Audit** the locally running generic Asana MCP server at `src/index.ts`.
+2. **Identify Gaps** in supported endpoints compared to what the user wants or needs.
+3. **Extend the MCP Server** dynamically on demand by implementing missing tools using the patterns established in the codebase.
+4. **Extend the Test Suite** in `tests/asana-mcp.test.ts` to fully cover the newly implemented tools under happy and error paths.
+5. **Compile and Verify** the modifications using local build and test scripts.
 
-You have direct access to the source code. Read it before drawing conclusions.
+You have direct read and write access to the source code. Read it first before planning any extensions.
 
 ---
 
-## Server Location
+## Server Location & Scripts
 
 | Artifact | Path |
 |---|---|
-| Source file | `${extensionPath}/src/index.ts` |
-| Compiled output | `${extensionPath}/dist/index.js` |
-| Build command | `npm run build` (run from `${extensionPath}`) |
-| Skill reference | Design doc: `asana_dashboard_design.md` |
-| Implementation reference | `asana_implementation_guide.md` |
+| Source file | `src/index.ts` |
+| Compiled output | `dist/index.js` |
+| Test suite | `tests/asana-mcp.test.ts` |
+| Build command | `npm run build` |
+| Test command | `npm test` |
 
 ---
 
-## Required Tool Matrix
+## Currently Implemented Tools (Vanilla Asana Bridge)
 
-This is the authoritative list of tools the MCP server must support for the full
-CE practice workflow. Use this as the source of truth for gap analysis.
+The server currently implements exactly **18** generic, plain-vanilla tools:
 
-### ✅ Tier 0 — Currently Implemented
-
-| Tool | Asana SDK Method | CE Use Case |
-|---|---|---|
-| `get_workspaces` | `WorkspacesApi.getWorkspaces()` | Session bootstrapping |
-| `get_teams` | `TeamsApi.getTeamsForWorkspace()` | Setup / team GID lookup |
-| `get_projects` | `ProjectsApi.getProjectsForTeam()` | List CE Pipeline + customer projects |
-| `get_tasks` | `TasksApi.getTasksForProject()` | Read pipeline tasks and customer project tasks |
-| `get_task_details` | `TasksApi.getTask()` | Deep-dive on a specific task |
-| `get_goals` | `GoalsApi.getGoals()` | Read quarterly CE goals |
-| `get_goal_details` | `GoalsApi.getGoal()` | Deep-dive on a specific goal |
-| `create_task` | `TasksApi.createTask()` | Create pipeline tasks and action items |
-| `create_subtask` | `TasksApi.createSubtaskForTask()` | Create subtasks on awareness/pre-sales tasks |
-| `update_task` | `TasksApi.updateTask(task_gid, body)` | Update Stage / Health / Risk Flag fields on pipeline tasks; mark tasks complete |
-| `create_project` | `ProjectsApi.createProject(body)` | Scaffold new customer project when POC is confirmed (Rule 4 automation support) |
-| `get_sections` | `SectionsApi.getSectionsForProject()` | List sections in CE Pipeline or customer project |
-| `create_section` | `SectionsApi.createSectionForProject()` | Add sections when scaffolding a new customer project |
-| `get_custom_fields` | `CustomFieldsApi.getCustomFields()` | Verify all 17 CE custom fields exist in the workspace |
-| `create_custom_field` | `CustomFieldsApi.createCustomField()` | Create organisation-level custom fields for CE practice schema |
-| `get_project_templates` | `ProjectTemplatesApi.getProjectTemplatesForTeam()` | Find GID of the Customer Project Template |
-| `create_project_from_template` | `ProjectTemplatesApi.instantiateProject()` | Create a new project by instantiating a saved template |
-| `scaffold_project_from_definition` | Custom / SDK orchestration | Create fully structured project, sections, tasks, and subtasks from JSON definition |
-
-### ❌ Tier 1 — Missing: High Priority (blocks daily CE workflow)
-
-| Tool | Asana SDK Method | CE Use Case |
-|---|---|---|
-| `add_task_to_project` | `TasksApi.addProjectForTask()` | Multi-home a task into CE Ops Daily Scrum board |
-| `update_project` | `ProjectsApi.updateProject()` | Update project-level custom fields (Stage, Health, WAU%) |
-
-### ❌ Tier 2 — Missing: Medium Priority (enables portfolio & goal automation)
-
-| Tool | Asana SDK Method | CE Use Case |
-|---|---|---|
-| `get_portfolios` | `PortfoliosApi.getPortfoliosForWorkspace()` | Find the CE Accounts portfolio GID |
-| `get_portfolio_items` | `PortfoliosApi.getItemsForPortfolio()` | List all customer projects in the portfolio for weekly report |
-| `add_project_to_portfolio` | `PortfoliosApi.addItemForPortfolio()` | Add new customer project to CE Accounts portfolio after creation |
-| `create_goal` | `GoalsApi.createGoal()` | Create quarterly CE goals programmatically |
-
-### ❌ Tier 3 — Missing: Low Priority (nice to have)
-
-| Tool | Asana SDK Method | CE Use Case |
-|---|---|---|
-| `remove_task_from_project` | `TasksApi.removeProjectForTask()` | Remove a task from daily scrum board when done |
-| `delete_task` | `TasksApi.deleteTask()` | Clean up incorrectly created tasks |
+1. `get_workspaces` — List workspaces.
+2. `get_teams` — List teams in a workspace.
+3. `get_projects` — List projects scoped to a team or workspace.
+4. `get_tasks` — List tasks within a specific project.
+5. `get_task_details` — Retrieve full details of a specific task by ID.
+6. `get_goals` — List goals scoped to a team or workspace.
+7. `get_goal_details` — Retrieve full details of a specific goal by ID.
+8. `create_task` — Create a task in a workspace, optional project, section, or custom fields.
+9. `create_subtask` — Create a subtask for a parent task.
+10. `update_task` — Update fields or custom fields of a task.
+11. `create_project` — Create a project within a team.
+12. `get_sections` — List sections in a project.
+13. `create_section` — Create a section in a project.
+14. `get_custom_fields` — List or filter custom fields in a workspace.
+15. `create_custom_field` — Create a workspace custom field (idempotent, text/enum/number/multi_select).
+16. `get_project_templates` — Find templates available for a team.
+17. `create_project_from_template` — Instantiate a template and wait for job completion.
+18. `scaffold_project_from_definition` — Create a fully structured project, sections, tasks, and subtasks from JSON definition recursively.
 
 ---
 
-## Workflow: Gap Analysis (`/admin:gap-analysis`)
+## Self-Improvement Workflow
 
-Execute these steps in order:
+When asked to add a new tool or support another Asana API endpoint, execute these steps meticulously:
 
-### Step 1: Read the Source File
-```
-Action: Read ${extensionPath}/src/index.ts in full
-Purpose: Build an inventory of currently implemented tools
-Extract: Every tool name from the ListToolsRequestSchema handler
-```
+### Step 1: Research the Asana API & SDK
+- Determine the correct official Node.js Asana SDK (`asana` npm package) class and method to use.
+- Identify all input parameters, their types, and whether they are optional or required.
+- Do NOT hardcode any credentials, team GIDs, workspace GIDs, or custom prefixes. All tools must remain generic and vanilla.
 
-### Step 2: Compare Against Required Tool Matrix
-```
-Action: Cross-reference extracted tool names against the Required Tool Matrix above
-Classify each missing tool as: Tier 1 (High) / Tier 2 (Medium) / Tier 3 (Low)
-Note any tools that exist but have incomplete implementations
-```
+### Step 2: Instantiate the API Client
+- Check if the relevant Asana API class is instantiated at the top of `src/index.ts`.
+- If missing, instantiate it using the standard pattern:
+  ```typescript
+  const portfoliosApi = new Asana.PortfoliosApi();
+  ```
 
-### Step 3: Check API Client Instances
-```
-Action: Check which Asana API classes are instantiated at the top of src/index.ts
-Currently instantiated: WorkspacesApi, ProjectsApi, TasksApi, GoalsApi, TeamsApi, SectionsApi, CustomFieldsApi, ProjectTemplatesApi
-Missing instances needed for gaps:
-  - PortfoliosApi  → needed for get_portfolios, get_portfolio_items, add_project_to_portfolio
-```
-
-### Step 4: Output Gap Report
-```
-Format the report as:
-
-## Asana MCP Server — Gap Analysis
-**Date:** <today>
-**Source:** src/index.ts
-**Tools implemented:** N / M required
-
-### ✅ Implemented (N tools)
-[list]
-
-### 🔴 Missing — Tier 1: High Priority (N tools)
-For each: Tool name | Asana SDK method | Why it matters | Estimated complexity
-
-### 🟡 Missing — Tier 2: Medium Priority (N tools)
-[same format]
-
-### 🟢 Missing — Tier 3: Low Priority (N tools)
-[same format]
-
-### 🔧 Implementation Notes
-- API clients to add
-- Patterns to follow
-- Build step required after changes
-```
-
----
-
-## Workflow: Implement Missing Tool (`/admin:implement <tool-name>`)
-
-When asked to implement a specific tool:
-
-### Step 1: Locate Insertion Points
-```
-Read src/index.ts and identify:
-1. The API client section (lines ~26-30) — add new API instance if needed
-2. The ListToolsRequestSchema handler — add tool definition
-3. The CallToolRequestSchema handler — add tool execution logic
-```
-
-### Step 2: Follow Established Patterns
-The codebase uses a consistent pattern. Always follow it:
-
-```typescript
-// In API client section:
-const sectionsApi = new Asana.SectionsApi();
-
-// In ListToolsRequestSchema handler:
-{
-  name: "tool_name",
-  description: "Clear description of what this does and when to use it.",
-  inputSchema: {
-    type: "object",
-    properties: {
-      required_param: {
-        type: "string",
-        description: "What this param does.",
+### Step 3: Add the Tool Definition (Schema)
+- Locate `ListToolsRequestSchema` in `src/index.ts`.
+- Append the new tool's schema definition. Make sure the parameters match the official Asana API, and include clear, descriptive text:
+  ```typescript
+  {
+    name: "add_task_to_project",
+    description: "Add a task to a project (multi-home).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        task_gid: {
+          type: "string",
+          description: "The ID of the task.",
+        },
+        project_gid: {
+          type: "string",
+          description: "The ID of the project to add the task to.",
+        },
       },
-      optional_param: {
-        type: "string",
-        description: "Optional. What this does.",
-      },
+      required: ["task_gid", "project_gid"],
     },
-    required: ["required_param"],
-  },
-},
+  }
+  ```
 
-// In CallToolRequestSchema handler:
-else if (name === "tool_name") {
-  const required_param = String(args?.required_param);
-  if (!required_param) throw new Error("required_param is required");
-  const result = await someApi.someMethod(required_param, {});
-  return {
-    content: [{ type: "text", text: JSON.stringify(result.data, null, 2) }],
-  };
-}
-```
+### Step 4: Add the Execution Handler
+- Locate the `CallToolRequestSchema` handler in `src/index.ts`.
+- Append the implementation in the `else if` chain.
+- Validate parameters strictly and throw clean errors if required parameters are missing:
+  ```typescript
+  else if (name === "add_task_to_project") {
+    const task_gid = String(args?.task_gid);
+    const project_gid = String(args?.project_gid);
+    if (!task_gid || !project_gid) {
+      throw new Error("task_gid and project_gid are required");
+    }
 
-### Step 3: Write the Implementation
-- Implement the tool following the pattern above
-- Use `multi_replace_file_content` to insert at both locations
-- Verify no TypeScript errors conceptually before saving
+    const result = await tasksApi.addProjectForTask(task_gid, { data: { project: project_gid } }, {});
+    return {
+      content: [{ type: "text", text: JSON.stringify(result.data, null, 2) }],
+    };
+  }
+  ```
 
-### Step 4: Build and Verify
-```
-Run: npm run build (from ${extensionPath})
-Verify: Build completes with no errors
-```
+### Step 5: Update the Test Suite
+- Open `tests/asana-mcp.test.ts`.
+- Ensure the Mock Functions block at the top declares mock constants for any new SDK methods used:
+  ```typescript
+  const mockAddProjectForTask = vi.fn();
+  ```
+- Ensure the `vi.mock("asana")` block maps the mock constants to the instantiated API class methods:
+  ```typescript
+  TasksApi: vi.fn().mockImplementation(() => ({
+    // existing mocks...
+    addProjectForTask: mockAddProjectForTask,
+  })),
+  ```
+- Increment the expected length of tools in the registration list test to match the new count:
+  ```typescript
+  expect(result.tools).toHaveLength(19); // updated count
+  expect(toolNames).toContain("add_task_to_project");
+  ```
+- Write comprehensive Vitest test cases covering:
+  - **Happy path**: Mock resolved value, call tool, assert mock was called with correct parameters, check the response.
+  - **Error handling**: Call tool with missing parameters, assert that it returns an error response with appropriate message.
 
----
-
-## Implementation Reference: Missing & Reference Tools
-
-### `update_task` (Implemented ✅)
-```typescript
-// API client: tasksApi already exists ✅
-// Schema input: task_gid (required), name?, notes?, completed?, custom_fields? (object)
-// Handler: tasksApi.updateTask(task_gid, updateData, {})
-// Key use: Updating Stage, Risk Flag, Customer Health, WAU Adoption % on tasks
-```
-
-### `create_project` (Implemented ✅)
-```typescript
-// API client: projectsApi already exists ✅
-// Schema input: name (required), team_gid?, workspace_gid?, notes?
-// Handler: projectsApi.createProject({ data: { name, team: team_gid ?? GCA_GTM_TEAM_GID, notes } }, {})
-// Default team: GCA_GTM_TEAM_GID (baked in)
-```
-
-### `get_sections` (Implemented ✅)
-```typescript
-// API client: sectionsApi already exists ✅
-// Schema input: project_gid (required)
-// Handler: sectionsApi.getSectionsForProject(project_gid, {})
-```
-
-### `create_section` (Implemented ✅)
-```typescript
-// API client: sectionsApi already exists ✅
-// Schema input: project_gid (required), name (required)
-// Handler: sectionsApi.createSectionForProject(project_gid, { body: { data: { name } } })
-```
-
-### `add_task_to_project` (Missing ❌)
-```typescript
-// API client: tasksApi already exists ✅
-// Schema input: task_gid (required), project_gid (required)
-// Handler: tasksApi.addProjectForTask(task_gid, { data: { project: project_gid } }, {})
-```
-
-### `get_portfolios` (Missing ❌)
-```typescript
-// API client: const portfoliosApi = new Asana.PortfoliosApi(); — ADD THIS
-// Schema input: workspace_gid (required)
-// Handler: portfoliosApi.getPortfoliosForWorkspace(workspace_gid, {})
-```
-
-### `get_portfolio_items` (Missing ❌)
-```typescript
-// API client: portfoliosApi (same as above)
-// Schema input: portfolio_gid (required)
-// Handler: portfoliosApi.getItemsForPortfolio(portfolio_gid, {})
-```
-
-### `add_project_to_portfolio` (Missing ❌)
-```typescript
-// API client: portfoliosApi (same as above)
-// Schema input: portfolio_gid (required), project_gid (required)
-// Handler: portfoliosApi.addItemForPortfolio(portfolio_gid, { data: { item: project_gid } }, {})
-```
-
-### `update_project` (Missing ❌)
-```typescript
-// API client: projectsApi already exists ✅
-// Schema input: project_gid (required), name?, notes?, custom_fields? (object)
-// Handler: projectsApi.updateProject(project_gid, { data: { ...fields } }, {})
-```
-
-### `create_goal` (Missing ❌)
-```typescript
-// API client: goalsApi already exists ✅
-// Schema input: name (required), notes?, time_period?, workspace_gid?
-// Handler: goalsApi.createGoal({ data: { name, notes, workspace: workspace_gid } }, {})
-```
+### Step 6: Build and Run Tests locally
+- Run `npm run build` and ensure TypeScript compilation completes successfully.
+- Run `npm test` and verify that **100%** of the unit tests pass flawlessly.
 
 ---
 
-## Important Rules
-1. **Always read src/index.ts before claiming a tool is missing** — it may have been added since this skill was written.
-2. **Always run `npm run build` after any code change** — the MCP server runs from `dist/index.js`.
-3. **Never break existing tools** — use `else if` chaining in the CallToolRequestSchema handler.
-4. **Default team scoping** — new tools that list or create objects should default to `GCA_GTM_TEAM_GID` where applicable.
-5. **Keep tool descriptions precise** — Gemini uses them to decide which tool to call.
+## Critical Rules to Respect
+1. **Plain Vanilla Bridge Only**: Never inject custom business logic, team-specific fallbacks, specific workspace IDs, or custom defaults into the schema or handlers.
+2. **Maintain Code Style**: Use standard `const` declarations, explicit typing where necessary, safe string coercion, and robust try-catch-free error boundaries (the main MCP request handler catches uncaught handler errors).
+3. **No Placeholders**: Never write placeholder methods, TODO comments, or mock-only files in production. Always write fully functional Asana SDK integrations.
+4. **Idempotence and Safety**: For mutations, write standard API calls, letting Asana handle backend constraints. For generic creations (like custom fields), run standard search checks only if required to meet user idempotence expectations.

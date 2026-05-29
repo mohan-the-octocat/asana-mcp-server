@@ -122,7 +122,6 @@ describe("Asana MCP Server Test Suite", () => {
   beforeAll(async () => {
     // Set environment variables before importing src/index.ts
     process.env.ASANA_ACCESS_TOKEN = "mock-access-token";
-    process.env.GCA_GTM_TEAM_GID = "1213807836434813";
 
     // Dynamically import src/index.ts to trigger registration
     await import("../src/index.js");
@@ -201,14 +200,10 @@ describe("Asana MCP Server Test Suite", () => {
     });
 
     // 3. get_projects
-    it("should call projectsApi.getProjectsForTeam with default team GID if team_gid is not provided", async () => {
-      mockGetProjectsForTeam.mockResolvedValue({
-        data: [{ gid: "p1", name: "Project 1" }],
-      });
-
+    it("should throw an error if neither team_gid nor workspace_gid is provided", async () => {
       const res = await callTool("get_projects");
-      expect(mockGetProjectsForTeam).toHaveBeenCalledWith("1213807836434813", expect.any(Object));
-      expect(res.content[0].text).toContain("Project 1");
+      expect(res.isError).toBe(true);
+      expect(res.content[0].text).toContain("Either team_gid or workspace_gid is required");
     });
 
     it("should call projectsApi.getProjectsForTeam with explicit team_gid", async () => {
@@ -221,25 +216,14 @@ describe("Asana MCP Server Test Suite", () => {
       expect(res.content[0].text).toContain("Project 2");
     });
 
-    it("should fall back to projectsApi.getProjectsForWorkspace if team_gid is cleared and workspace_gid is provided", async () => {
-      // Temporarily clear default GID to force workspace path
-      const originalGid = process.env.GCA_GTM_TEAM_GID;
-      delete process.env.GCA_GTM_TEAM_GID;
-      
-      // Since GCA_GTM_TEAM_GID is read in src/index.ts at module load time (and cached in a local const),
-      // we can't easily change the module's internal `GCA_GTM_TEAM_GID` constant directly just by deleting process.env.GCA_GTM_TEAM_GID now.
-      // But let's verify if deleting it beforehand worked. Since we loaded index.ts in beforeAll, it cached the original GCA_GTM_TEAM_GID ("1213807836434813").
-      // Wait, if team_gid is resolved as:
-      // const team_gid = args?.team_gid ? String(args.team_gid) : GCA_GTM_TEAM_GID;
-      // It will use "1213807836434813" unless we set team_gid explicitly.
-      // But wait! Is there any way to make team_gid falsy? If we pass team_gid: "" or team_gid: null/undefined?
-      // If we pass args.team_gid: undefined, it resolves to GCA_GTM_TEAM_GID.
-      // But wait, what if we re-import or what if we just pass a team_gid?
-      // Since GCA_GTM_TEAM_GID is resolved to "1213807836434813", team_gid will always be truthy in that handler.
-      // Wait, let's see. What if we mock getProjectsForWorkspace? We can test passing workspace_gid, but it will still call getProjectsForTeam because team_gid resolves to GCA_GTM_TEAM_GID.
-      // Let's verify if there is any other way. Since team_gid is resolved to "1213807836434813", it will call getProjectsForTeam.
-      // Let's restore process.env.GCA_GTM_TEAM_GID.
-      process.env.GCA_GTM_TEAM_GID = originalGid;
+    it("should call projectsApi.getProjectsForWorkspace if workspace_gid is provided without team_gid", async () => {
+      mockGetProjectsForWorkspace.mockResolvedValue({
+        data: [{ gid: "p3", name: "Project 3" }],
+      });
+
+      const res = await callTool("get_projects", { workspace_gid: "w1" });
+      expect(mockGetProjectsForWorkspace).toHaveBeenCalledWith("w1", expect.any(Object));
+      expect(res.content[0].text).toContain("Project 3");
     });
 
     // 4. get_tasks
@@ -276,18 +260,24 @@ describe("Asana MCP Server Test Suite", () => {
     });
 
     // 7. get_goals
-    it("should call goalsApi.getGoals and return list of goals", async () => {
+    it("should call goalsApi.getGoals and return list of goals when team_gid and workspace_gid are provided", async () => {
       mockGetGoals.mockResolvedValue({
         data: [{ gid: "g1", name: "ARR Goal" }],
       });
 
-      const res = await callTool("get_goals", { workspace_gid: "w1" });
+      const res = await callTool("get_goals", { workspace_gid: "w1", team_gid: "t1" });
       expect(mockGetGoals).toHaveBeenCalledWith({
         limit: 100,
         workspace: "w1",
-        team: "1213807836434813",
+        team: "t1",
       });
       expect(res.content[0].text).toContain("ARR Goal");
+    });
+
+    it("should throw an error if neither team_gid nor workspace_gid is provided in get_goals", async () => {
+      const res = await callTool("get_goals", {});
+      expect(res.isError).toBe(true);
+      expect(res.content[0].text).toContain("Either workspace_gid or team_gid must be provided");
     });
 
     // 8. create_task
@@ -436,6 +426,7 @@ describe("Asana MCP Server Test Suite", () => {
 
       const res = await callTool("create_project", {
         name: "New Customer Project",
+        team_gid: "my-team",
         notes: "POC Phase",
         color: "light-green",
       });
@@ -444,7 +435,7 @@ describe("Asana MCP Server Test Suite", () => {
         {
           data: {
             name: "New Customer Project",
-            team: "1213807836434813",
+            team: "my-team",
             notes: "POC Phase",
             color: "light-green",
           },
@@ -452,6 +443,12 @@ describe("Asana MCP Server Test Suite", () => {
         {}
       );
       expect(res.content[0].text).toContain("New Customer Project");
+    });
+
+    it("should throw an error if create_project is called without team_gid or name", async () => {
+      const res = await callTool("create_project", { name: "Test" });
+      expect(res.isError).toBe(true);
+      expect(res.content[0].text).toContain("name and team_gid are required");
     });
 
     // 12. get_sections
@@ -483,7 +480,7 @@ describe("Asana MCP Server Test Suite", () => {
     });
 
     // 14. get_custom_fields
-    it("should list custom fields with pagination and filter by name prefix", async () => {
+    it("should list custom fields with pagination and filter by explicit name prefix", async () => {
       mockGetCustomFieldsForWorkspace
         .mockResolvedValueOnce({
           data: [
@@ -497,7 +494,7 @@ describe("Asana MCP Server Test Suite", () => {
           next_page: null,
         });
 
-      const res = await callTool("get_custom_fields", { workspace_gid: "w1" });
+      const res = await callTool("get_custom_fields", { workspace_gid: "w1", name_prefix: "GCA_GTM_" });
       
       // Should query workspace twice due to next_page pagination
       expect(mockGetCustomFieldsForWorkspace).toHaveBeenCalledTimes(2);
@@ -512,11 +509,30 @@ describe("Asana MCP Server Test Suite", () => {
         { limit: 100, offset: "page2", opt_fields: expect.any(String) }
       );
 
-      // Default prefix GCA_GTM_ should filter client-side
+      // Explicit prefix should filter client-side
       const data = JSON.parse(res.content[0].text);
       expect(data).toHaveLength(2);
       expect(data[0].name).toBe("GCA_GTM_Stage");
       expect(data[1].name).toBe("GCA_GTM_ARR");
+    });
+
+    it("should return all custom fields when name_prefix is omitted (defaults to empty prefix)", async () => {
+      mockGetCustomFieldsForWorkspace
+        .mockResolvedValueOnce({
+          data: [
+            { gid: "cf1", name: "GCA_GTM_Stage" },
+            { gid: "cf2", name: "Other_Field" },
+          ],
+          next_page: { offset: "page2" },
+        })
+        .mockResolvedValueOnce({
+          data: [{ gid: "cf3", name: "GCA_GTM_ARR" }],
+          next_page: null,
+        });
+
+      const res = await callTool("get_custom_fields", { workspace_gid: "w1" });
+      const data = JSON.parse(res.content[0].text);
+      expect(data).toHaveLength(3);
     });
 
     it("should list all custom fields when name_prefix is empty", async () => {
@@ -621,9 +637,9 @@ describe("Asana MCP Server Test Suite", () => {
         data: [{ gid: "pt1", name: "CE Customer Template" }],
       });
 
-      const res = await callTool("get_project_templates");
+      const res = await callTool("get_project_templates", { team_gid: "my-team" });
       expect(mockGetProjectTemplatesForTeam).toHaveBeenCalledWith(
-        "1213807836434813",
+        "my-team",
         { limit: 100 }
       );
       expect(res.content[0].text).toContain("CE Customer Template");
@@ -655,6 +671,7 @@ describe("Asana MCP Server Test Suite", () => {
       const promise = callTool("create_project_from_template", {
         template_gid: "pt1",
         name: "Instantiated Customer Project",
+        team_gid: "my-team",
       });
 
       // Assert template instantiation was triggered immediately
@@ -664,7 +681,7 @@ describe("Asana MCP Server Test Suite", () => {
           body: {
             data: {
               name: "Instantiated Customer Project",
-              team: "1213807836434813",
+              team: "my-team",
               public: false,
             },
           },
@@ -696,6 +713,7 @@ describe("Asana MCP Server Test Suite", () => {
       const promise = callTool("create_project_from_template", {
         template_gid: "pt1",
         name: "Failed Project",
+        team_gid: "my-team",
       });
 
       await vi.advanceTimersByTimeAsync(3000);
@@ -725,6 +743,7 @@ describe("Asana MCP Server Test Suite", () => {
 
       const res = await callTool("scaffold_project_from_definition", {
         workspace_gid: "w1",
+        team_gid: "my-team",
         definition: {
           name: "Enterprise POC",
           color: "light-blue",
@@ -758,7 +777,7 @@ describe("Asana MCP Server Test Suite", () => {
         {
           data: {
             name: "Enterprise POC",
-            team: "1213807836434813",
+            team: "my-team",
             color: "light-blue",
             notes: "A complex deployment",
           },
