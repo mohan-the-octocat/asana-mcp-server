@@ -11,3 +11,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: update conductor/product.md to reflect the current state of the project. Ensure all the capabilities are captured**
   *Link: [./tracks/update_product_20260529/](./tracks/update_product_20260529/)*
+
+---
+
+- [ ] **Track: Decouple the PM Skill into a separate Gemini CLI Extension named 'the-wandered'. Keeping this extension specifically for generically bridging Gemini CLI and Asana.**
+  *Link: [./tracks/decouple_pm_20260529/](./tracks/decouple_pm_20260529/)*
